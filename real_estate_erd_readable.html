@@ -1,0 +1,320 @@
+<style>
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: #ffffff;
+    color: #1f2937;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  body {
+    padding: 24px;
+  }
+
+  .page-title {
+    margin: 0 0 8px;
+    font-size: 26px;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  .page-subtitle {
+    margin: 0 0 20px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #4b5563;
+  }
+
+  .diagram-card {
+    width: 100%;
+    overflow: auto;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+
+  #erd {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  #erd svg.erDiagram {
+    display: block;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    overflow: visible;
+  }
+
+  /* Make Mermaid ERD text large and high-contrast. */
+  #erd svg.erDiagram text,
+  #erd svg.erDiagram tspan {
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 500;
+    fill: #111827 !important;
+  }
+
+  #erd svg.erDiagram .entityLabel,
+  #erd svg.erDiagram .entityLabel text,
+  #erd svg.erDiagram .entityLabel tspan {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    fill: #111827 !important;
+  }
+
+  #erd svg.erDiagram .attributeBoxEven,
+  #erd svg.erDiagram .attributeBoxOdd {
+    fill: #ffffff !important;
+  }
+
+  #erd svg.erDiagram .divider path {
+    stroke: #9ca3af !important;
+    stroke-opacity: 1 !important;
+  }
+
+  #erd svg.erDiagram .row-rect-odd path,
+  #erd svg.erDiagram .row-rect-odd rect,
+  #erd svg.erDiagram .row-rect-even path,
+  #erd svg.erDiagram .row-rect-even rect {
+    stroke: none !important;
+  }
+
+  #erd svg.erDiagram .relationshipLine {
+    stroke: #6b7280 !important;
+    stroke-width: 1.5px !important;
+  }
+
+  #erd svg.erDiagram .relationshipLabelBox {
+    fill: #ffffff !important;
+    opacity: 1 !important;
+  }
+
+  #erd svg.erDiagram .relationshipLabel {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    fill: #374151 !important;
+  }
+
+  .hint {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #6b7280;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
+<h1 class="page-title">Real Estate Database — Entity Relationship Diagram</h1>
+<p class="page-subtitle">Builders, projects, towers, flats, pricing, amenities, nearby places, legal, construction, market data, financing and media.</p>
+<div class="diagram-card">
+  <div id="erd"></div>
+</div>
+<p class="hint">Tip: scroll horizontally/vertically inside the diagram area to view all tables and relationships.</p>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const themeMode = document.documentElement.dataset.mode;
+const dark = themeMode ? themeMode === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: 'Arial, Helvetica, sans-serif',
+  themeVariables: {
+    darkMode: false,
+    fontSize: '16px',
+    fontFamily: 'Arial, Helvetica, sans-serif',
+    lineColor: '#6b7280',
+    textColor: '#111827',
+    primaryTextColor: '#111827',
+    secondaryTextColor: '#111827',
+    tertiaryTextColor: '#111827',
+  },
+});
+const def = `erDiagram
+    BUILDERS ||--o{ PROJECTS : develops
+    PROJECTS ||--o{ TOWERS : contains
+    TOWERS ||--o{ FLATS : contains
+    FLATS ||--|| PRICING : has
+    PROJECTS ||--o{ NEARBY_PLACES : located_near
+    PROJECTS ||--|| LEGAL_DOCUMENTATION : has
+    PROJECTS ||--o{ MEDIA : has
+    FLATS ||--o{ MEDIA : has
+    TOWERS ||--o{ CONSTRUCTION_PROGRESS : tracked_by
+    PROJECTS ||--o{ MARKET_DATA : has
+    FLATS ||--o{ FINANCING : eligible_for
+    BANKS ||--o{ FINANCING : offers
+    PROJECTS ||--o{ PROJECT_AMENITIES : has
+    AMENITIES_MASTER ||--o{ PROJECT_AMENITIES : listed_in
+    FLATS ||--o{ FLAT_AMENITIES : has
+    AMENITIES_MASTER ||--o{ FLAT_AMENITIES : listed_in
+
+    BUILDERS {
+        int builder_id PK
+        string name
+        string contact_info
+        string delivery_history
+    }
+    PROJECTS {
+        int project_id PK
+        int builder_id FK
+        string name
+        string project_type
+        string status
+        string rera_number
+        date launch_date
+        date possession_date
+        int total_towers
+        int total_units
+        float size_acres
+        string city
+        string locality
+        string pincode
+        float latitude
+        float longitude
+    }
+    TOWERS {
+        int tower_id PK
+        int project_id FK
+        string tower_name
+        int total_floors
+    }
+    FLATS {
+        int flat_id PK
+        int tower_id FK
+        int floor_number
+        string flat_number
+        string bhk
+        float carpet_area
+        float built_up_area
+        float super_built_up_area
+        string facing
+        string view
+        string furnishing_status
+        boolean is_corner_unit
+        boolean vastu_compliant
+        string availability_status
+    }
+    PRICING {
+        int pricing_id PK
+        int flat_id FK
+        float base_price
+        float price_per_sqft
+        float floor_rise_charges
+        float maintenance_charges
+        float gst
+        float stamp_duty
+        float all_inclusive_price
+        float booking_amount
+        string payment_plan
+    }
+    AMENITIES_MASTER {
+        int amenity_id PK
+        string name
+        string level
+    }
+    PROJECT_AMENITIES {
+        int project_id FK
+        int amenity_id FK
+    }
+    FLAT_AMENITIES {
+        int flat_id FK
+        int amenity_id FK
+    }
+    NEARBY_PLACES {
+        int place_id PK
+        int project_id FK
+        string category
+        string name
+        float distance_km
+        string travel_time
+    }
+    LEGAL_DOCUMENTATION {
+        int legal_id PK
+        int project_id FK
+        string rera_registration
+        string rera_status
+        string title_status
+        string oc_cc_status
+        string encumbrance_status
+    }
+    CONSTRUCTION_PROGRESS {
+        int progress_id PK
+        int tower_id FK
+        string construction_stage
+        float progress_percent
+        date last_updated
+        date expected_possession
+        date actual_possession
+    }
+    MARKET_DATA {
+        int market_id PK
+        int project_id FK
+        float current_market_price
+        float locality_avg_price
+        float price_appreciation
+        float rental_yield
+        string demand_level
+        date recorded_date
+    }
+    BANKS {
+        int bank_id PK
+        string name
+    }
+    FINANCING {
+        int financing_id PK
+        int flat_id FK
+        int bank_id FK
+        float interest_rate
+        float max_loan_percent
+        int tenure_years
+        float emi
+        float down_payment
+    }
+    MEDIA {
+        int media_id PK
+        int project_id FK
+        int flat_id FK
+        string media_type
+        string url
+    }`;
+const { svg } = await mermaid.render('erd-svg', def);
+document.getElementById('erd').innerHTML = svg;
+
+document.querySelectorAll('#erd svg.erDiagram .node').forEach(node => {
+  const firstPath = node.querySelector('path[d]');
+  if (!firstPath) return;
+  const d = firstPath.getAttribute('d');
+  const nums = d.match(/-?[\d.]+/g)?.map(Number);
+  if (!nums || nums.length < 8) return;
+  const xs = [nums[0], nums[2], nums[4], nums[6]];
+  const ys = [nums[1], nums[3], nums[5], nums[7]];
+  const x = Math.min(...xs), y = Math.min(...ys);
+  const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', x); rect.setAttribute('y', y);
+  rect.setAttribute('width', w); rect.setAttribute('height', h);
+  rect.setAttribute('rx', '8');
+  for (const a of ['fill', 'stroke', 'stroke-width', 'class', 'style']) {
+    if (firstPath.hasAttribute(a)) rect.setAttribute(a, firstPath.getAttribute(a));
+  }
+  firstPath.replaceWith(rect);
+});
+document.querySelectorAll('#erd svg.erDiagram .row-rect-odd path, #erd svg.erDiagram .row-rect-even path').forEach(p => {
+  p.setAttribute('stroke', 'none');
+});
+</script>
